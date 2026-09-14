@@ -228,6 +228,84 @@ h1 {
   min-height: 0;
 }
 
+.snake-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.snake-score {
+  font-weight: 700;
+  color: #5a3948;
+}
+
+.snake-canvas {
+  width: min(100%, 360px);
+  height: auto;
+  border-radius: 12px;
+  border: 1px solid rgba(157, 83, 110, 0.3);
+  display: block;
+  margin: 0 auto;
+  background: #fff4f8;
+}
+
+.game-grid {
+  display: grid;
+  gap: 0.45rem;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.game-grid-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  width: min(100%, 320px);
+  margin: 0 auto;
+}
+
+.game-cell {
+  border: 1px solid rgba(157, 83, 110, 0.35);
+  border-radius: 10px;
+  background: #fff;
+  color: #6b2f47;
+  min-height: 58px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.game-cell.done {
+  background: #f8e8ef;
+}
+
+.chess-grid {
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 0;
+  width: min(100%, 360px);
+  margin: 0 auto;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(157, 83, 110, 0.35);
+}
+
+.chess-cell {
+  border: none;
+  aspect-ratio: 1 / 1;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.chess-cell.light {
+  background: #f7d8e2;
+}
+
+.chess-cell.dark {
+  background: #cf8fa3;
+}
+
+.chess-cell.selected {
+  outline: 2px solid #2d7ff9;
+  outline-offset: -2px;
+}
+
 .minesweeper-board {
   display: grid;
   gap: 0.35rem;
