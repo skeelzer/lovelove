@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Calendrier de l'avant</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700&family=Playfair+Display:wght@600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="page">
+      <header class="hero">
+        <p class="hero-kicker">Compte a rebours vers le 28 septembre</p>
+        <h1>Calendrier de l'avant</h1>
+      </header>
+
+      <section class="grid-wrapper" aria-label="Cases du calendrier">
+        <div id="countdownGrid" class="calendar-grid"></div>
+        <div class="j-center-wrap">
+          <div id="dayJContainer"></div>
+        </div>
+      </section>
+    </main>
+
+    <div id="caseModal" class="modal" aria-hidden="true" role="dialog" aria-labelledby="modalTitle">
+      <div class="modal-card">
+        <button id="closeModalBtn" class="close-btn" type="button" aria-label="Fermer">×</button>
+        <h2 id="modalTitle"></h2>
+        <p id="modalDate" class="modal-date"></p>
+        <div id="modalBody" class="modal-body"></div>
+      </div>
+    </div>
+
+    <template id="lockedMessageTemplate">
+      <div class="locked-note">
+        <p>Patience: cette case n'est pas encore disponible.</p>
+      </div>
+    </template>
+
+    <script src="script.js"></script>
+  </body>
+</html>
