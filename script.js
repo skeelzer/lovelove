@@ -11,9 +11,9 @@ const SNAKE_LEVELS = {
   dur: { speed: 95, goal: 16 }
 };
 const PACMAN_LEVELS = {
-  facile: { speed: 190, ghostCount: 1, goal: 20 },
-  moyen: { speed: 145, ghostCount: 2, goal: 35 },
-  dur: { speed: 115, ghostCount: 3, goal: 50 }
+  facile: { speed: 190, ghostCount: 2, goal: 50 },
+  moyen: { speed: 145, ghostCount: 3, goal: 75 },
+  dur: { speed: 115, ghostCount: 4, goal: 110 }
 };
 const CATRUNNER_LEVELS = {
   facile: { speed: 4, spawn: 95, goal: 18 },
@@ -96,19 +96,19 @@ window.addEventListener("keydown", (event) => {
 function buildEntries() {
   const items = [];
   const gameByLabel = {
-    "J-14": "minesweeper",
-    "J-13": "snake",
-    "J-12": "pacman",
-    "J-11": "catrunner",
-    "J-10": "tetris",
-    "J-9": "chess",
-    "J-8": "tictactoe",
-    "J-7": "solitaire",
-    "J-6": "spaceinvaders",
-    "J-5": "flappy",
-    "J-4": "pong",
-    "J-3": "pinball",
-    "J-2": "fighter"
+    "J-14",
+    "J-13",
+    "J-12",
+    "J-11",
+    "J-10",
+    "J-9",
+    "J-8",
+    "J-7",
+    "J-6",
+    "J-5",
+    "J-4",
+    "J-3",
+    "J-2"
   };
   const photoFiles = [
     "Personnel/J.jpg",
