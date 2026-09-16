@@ -1,9 +1,9 @@
 const TARGET_DATE = new Date(2026, 8, 28); // 28 septembre 2026
 const TOTAL_CASES = 15; // J, J-1 ... J-14
 const MINESWEEPER_LEVELS = {
-  facile: { rows: 8, cols: 8, hearts: 8 },
-  moyen: { rows: 9, cols: 9, hearts: 12 },
-  dur: { rows: 12, cols: 12, hearts: 28 }
+  facile: { rows: 9, cols: 9, hearts: 12 },
+  moyen: { rows: 14, cols: 14, hearts: 44 },
+  dur: { rows: 25, cols: 25, hearts: 99 }
 };
 const SNAKE_LEVELS = {
   facile: { speed: 180, goal: 8 },
@@ -11,9 +11,9 @@ const SNAKE_LEVELS = {
   dur: { speed: 95, goal: 16 }
 };
 const PACMAN_LEVELS = {
-  facile: { speed: 190, ghostCount: 2, goal: 50 },
-  moyen: { speed: 145, ghostCount: 3, goal: 75 },
-  dur: { speed: 115, ghostCount: 4, goal: 110 }
+  facile: { speed: 190, ghostCount: 2, rounds: 1, lives: 3 },
+  moyen: { speed: 145, ghostCount: 3, rounds: 2, lives: 3 },
+  dur: { speed: 115, ghostCount: 4, rounds: 3, lives: 3 }
 };
 const CATRUNNER_LEVELS = {
   facile: { speed: 4, spawn: 95, goal: 18 },
@@ -50,6 +50,7 @@ const FIGHTER_LEVELS = {
   moyen: { ai: 0.8 },
   dur: { ai: 1.2 }
 };
+const J_ANSWER_VIDEO_URL = "";
 const GAME_META = {
   minesweeper: { name: "Démineur", controls: "Clique sur les cases • évite les cœurs" },
   snake: { name: "Snake", controls: "Flèches directionnelles • mange les points" },
@@ -96,19 +97,19 @@ window.addEventListener("keydown", (event) => {
 function buildEntries() {
   const items = [];
   const gameByLabel = {
-    "J-14",
-    "J-13",
-    "J-12",
-    "J-11",
-    "J-10",
-    "J-9",
-    "J-8",
-    "J-7",
-    "J-6",
-    "J-5",
-    "J-4",
-    "J-3",
-    "J-2"
+    "J-14": "minesweeper",
+    "J-13": "snake",
+    "J-12": "pacman",
+    "J-11": "catrunner",
+    "J-10": "tetris",
+    "J-9": "chess",
+    "J-8": "tictactoe",
+    "J-7": "solitaire",
+    "J-6": "spaceinvaders",
+    "J-5": "flappy",
+    "J-4": "pong",
+    "J-3": "pinball",
+    "J-2": "fighter"
   };
   const photoFiles = [
     "Personnel/J.jpg",
@@ -238,14 +239,21 @@ function openCase(item, isUnlocked) {
     activeGameCleanup = null;
   }
 
-  const gameMeta = getGameMeta(item.contentType);
-  modalTitle.textContent = `${item.label} — ${gameMeta.name}`;
   modalDate.textContent = `Date d'ouverture: ${formatDate(item.unlockDate)}`;
   modalBody.innerHTML = "";
 
   if (!isUnlocked) {
+    modalTitle.textContent = item.label;
     modalBody.appendChild(lockedMessageTemplate.content.cloneNode(true));
     openModal();
+    return;
+  }
+
+  const gameMeta = getGameMeta(item.contentType);
+  modalTitle.textContent = item.label === "J" ? "J — Question finale" : `${item.label} — ${gameMeta.name}`;
+
+  if (item.label === "J") {
+    renderFinalDayQuestion();
     return;
   }
 
@@ -342,6 +350,173 @@ function openCase(item, isUnlocked) {
   openModal();
 }
 
+function renderFinalDayQuestion() {
+  const panel = document.createElement("div");
+  panel.className = "final-question-panel";
+
+  const prompt = document.createElement("h3");
+  prompt.className = "final-question-title";
+  prompt.textContent = "Est-ce que Lucas a réussi à prendre l'avion ?";
+
+  const hint = document.createElement("p");
+  hint.className = "final-question-hint";
+  hint.textContent = "Choisis une réponse.";
+
+  const playground = document.createElement("div");
+  playground.className = "final-answer-playground";
+
+  const answerRow = document.createElement("div");
+  answerRow.className = "final-answer-row";
+
+  const yesSlot = document.createElement("div");
+  yesSlot.className = "final-answer-slot";
+
+  const noSlot = document.createElement("div");
+  noSlot.className = "final-answer-slot";
+
+  const yesButton = document.createElement("button");
+  yesButton.type = "button";
+  yesButton.className = "final-answer-btn yes";
+  yesButton.textContent = "Oui";
+
+  const noButton = document.createElement("button");
+  noButton.type = "button";
+  noButton.className = "final-answer-btn no";
+  noButton.textContent = "Non";
+
+  const noResult = document.createElement("div");
+  noResult.className = "final-no-result";
+
+  const yesState = {
+    x: 0,
+    y: 0,
+    scale: 1,
+    hue: 338,
+    radius: 16,
+    rotate: 0,
+    clicks: 0,
+    escaped: false,
+    vanished: false
+  };
+
+  const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+  const rand = (min, max) => min + Math.random() * (max - min);
+
+  const applyYesStyle = () => {
+    yesButton.style.left = `${yesState.x}px`;
+    yesButton.style.top = `${yesState.y}px`;
+    yesButton.style.transform = `scale(${yesState.scale}) rotate(${yesState.rotate}deg)`;
+    yesButton.style.borderRadius = `${yesState.radius}px`;
+    yesButton.style.background = `hsl(${yesState.hue}deg 72% 68%)`;
+    yesButton.style.transitionDuration = `${120 + Math.floor(rand(0, 200))}ms`;
+  };
+
+  const moveYesToPlayground = () => {
+    if (yesState.escaped || yesState.vanished) {
+      return;
+    }
+    yesState.escaped = true;
+    yesButton.classList.add("is-escaping");
+    playground.appendChild(yesButton);
+
+    const hostWidth = Math.max(220, playground.clientWidth || 280);
+    const hostHeight = Math.max(128, playground.clientHeight || 156);
+    const btnWidth = Math.max(72, yesButton.offsetWidth || 78);
+    const btnHeight = Math.max(36, yesButton.offsetHeight || 42);
+    yesState.x = Math.round(hostWidth / 2 - btnWidth / 2);
+    yesState.y = Math.round(hostHeight / 2 - btnHeight / 2);
+    applyYesStyle();
+  };
+
+  const vanishYes = () => {
+    if (yesState.vanished) {
+      return;
+    }
+    yesState.vanished = true;
+    yesButton.disabled = true;
+    yesButton.style.pointerEvents = "none";
+    yesButton.style.opacity = "0";
+    yesButton.style.transform = "scale(0.15) rotate(32deg)";
+    window.setTimeout(() => {
+      if (yesButton.parentElement) {
+        yesButton.remove();
+      }
+    }, 220);
+  };
+
+  yesButton.addEventListener("click", () => {
+    if (yesState.vanished) {
+      return;
+    }
+
+    moveYesToPlayground();
+    yesState.clicks += 1;
+
+    const hostWidth = Math.max(220, playground.clientWidth || 280);
+    const hostHeight = Math.max(128, playground.clientHeight || 156);
+    const btnWidth = Math.max(72, yesButton.offsetWidth || 78);
+    const btnHeight = Math.max(36, yesButton.offsetHeight || 42);
+    const progress = clamp(yesState.clicks / 8, 0, 1);
+    const warpedProgress = Math.pow(progress, 1.65);
+    const moveBoost = 1 + warpedProgress * 1.6;
+    const surpriseJump = Math.random() < 0.35;
+
+    yesState.x = clamp(yesState.x + rand(-92, 92) * moveBoost, 8, hostWidth - btnWidth - 8);
+    yesState.y = clamp(yesState.y + rand(-64, 64) * moveBoost, 8, hostHeight - btnHeight - 8);
+
+    if (surpriseJump) {
+      yesState.x = clamp(rand(8, hostWidth - btnWidth - 8), 8, hostWidth - btnWidth - 8);
+      yesState.y = clamp(rand(8, hostHeight - btnHeight - 8), 8, hostHeight - btnHeight - 8);
+      yesState.rotate = clamp(yesState.rotate + rand(-70, 70), -88, 88);
+      yesState.hue = (yesState.hue + rand(80, 160)) % 360;
+    } else {
+      yesState.rotate = clamp(yesState.rotate + rand(-18, 18) * (1 + warpedProgress), -60, 60);
+      yesState.hue = (yesState.hue + rand(22, 84)) % 360;
+    }
+
+    yesState.scale = clamp(1.14 - warpedProgress * 0.74 + rand(-0.16, 0.2), 0.28, 1.34);
+    yesState.radius = clamp(Math.round(yesState.radius + rand(-8, 14)), 4, 34);
+    yesButton.style.opacity = `${clamp(1 - Math.pow(progress, 1.35) * 0.82, 0.1, 1)}`;
+    applyYesStyle();
+
+    if (yesState.clicks >= 8) {
+      vanishYes();
+    }
+  });
+
+  noButton.addEventListener("click", () => {
+    noResult.innerHTML = "";
+
+    if (!J_ANSWER_VIDEO_URL) {
+      const pending = document.createElement("p");
+      pending.textContent = "Vidéo pas encore définie. Donne-moi le lien et je la branche ici.";
+      noResult.appendChild(pending);
+      return;
+    }
+
+    const video = document.createElement("video");
+    video.className = "final-video";
+    video.controls = true;
+    video.autoplay = true;
+    video.playsInline = true;
+    video.src = J_ANSWER_VIDEO_URL;
+    noResult.appendChild(video);
+  });
+
+  yesSlot.appendChild(yesButton);
+  noSlot.appendChild(noButton);
+  answerRow.appendChild(yesSlot);
+  answerRow.appendChild(noSlot);
+  playground.appendChild(answerRow);
+  panel.appendChild(prompt);
+  panel.appendChild(hint);
+  panel.appendChild(playground);
+  panel.appendChild(noResult);
+  modalBody.appendChild(panel);
+
+  openModal();
+}
+
 function renderMinesweeper(item) {
   const panel = document.createElement("div");
   panel.className = "minesweeper-panel";
@@ -367,6 +542,9 @@ function renderMinesweeper(item) {
   resetButton.className = "minesweeper-reset";
   resetButton.textContent = "Reset";
 
+  const flagsBox = document.createElement("div");
+  flagsBox.className = "minesweeper-stats";
+
   const messageBox = document.createElement("div");
   messageBox.className = "minesweeper-message-box";
 
@@ -377,6 +555,7 @@ function renderMinesweeper(item) {
   controls.appendChild(difficultySelect);
   controls.appendChild(resetButton);
   panel.appendChild(controls);
+  panel.appendChild(flagsBox);
   panel.appendChild(messageBox);
   panel.appendChild(board);
   modalBody.appendChild(panel);
@@ -389,7 +568,8 @@ function renderMinesweeper(item) {
     currentConfig = MINESWEEPER_LEVELS[levelKey] || MINESWEEPER_LEVELS.moyen;
     boardState = createMinesweeperState(currentConfig);
     messageBox.innerHTML = "";
-    board.style.gridTemplateColumns = `repeat(${currentConfig.cols}, minmax(0, 1fr))`;
+    board.style.setProperty("--mine-cols", String(currentConfig.cols));
+    board.style.setProperty("--mine-rows", String(currentConfig.rows));
     drawBoard();
   };
 
@@ -403,6 +583,15 @@ function renderMinesweeper(item) {
     }
     messageBox.innerHTML = "";
     messageBox.appendChild(message);
+  };
+
+  const updateFlagCount = () => {
+    const flagCount = boardState.board.reduce(
+      (total, row) => total + row.filter((cell) => cell.flagged).length,
+      0
+    );
+    const flagsRemaining = currentConfig.hearts - flagCount;
+    flagsBox.textContent = `Drapeaux restants: ${flagsRemaining}`;
   };
 
   const drawBoard = () => {
@@ -456,6 +645,8 @@ function renderMinesweeper(item) {
         board.appendChild(button);
       }
     }
+
+    updateFlagCount();
   };
 
   difficultySelect.addEventListener("change", () => {
@@ -605,7 +796,7 @@ function renderSnake(item) {
 
   const startLoop = () => {
     stopLoop();
-    intervalId = window.setInterval(step, levelConfig.speed);
+    intervalId = window.setInterval(step, getCurrentSpeed());
   };
 
   const checkCollision = (head) => {
@@ -791,7 +982,10 @@ function renderPacman(item) {
   const cellSize = canvas.width / cols;
 
   let intervalId = null;
+  let transitionTimeoutId = null;
   let levelConfig = PACMAN_LEVELS.moyen;
+  let roundIndex = 0;
+  let lives = 3;
   let pacman = { x: 1, y: 1, dirX: 0, dirY: 0, nextDirX: 0, nextDirY: 0 };
   let ghosts = [];
   let pellets = new Set();
@@ -799,6 +993,7 @@ function renderPacman(item) {
   let ended = false;
   let hasStarted = false;
   let mouthPhase = 0;
+  let stageMessage = "";
 
   const tileKey = (x, y) => `${x},${y}`;
 
@@ -810,8 +1005,17 @@ function renderPacman(item) {
   };
 
   const updateScore = () => {
-    scoreBox.textContent = `Score: ${score} | Objectif: ${levelConfig.goal}`;
+    scoreBox.textContent = `Pièces: ${score} | Restant: ${pellets.size} | Niveau: ${roundIndex + 1}/${levelConfig.rounds} | Vies: ${lives}`;
   };
+
+  const clearTransitionTimer = () => {
+    if (transitionTimeoutId) {
+      window.clearTimeout(transitionTimeoutId);
+      transitionTimeoutId = null;
+    }
+  };
+
+  const getCurrentSpeed = () => Math.max(70, levelConfig.speed - roundIndex * 12);
 
   const showResult = (type) => {
     const message = document.createElement("div");
@@ -852,9 +1056,91 @@ function renderPacman(item) {
     const starts = [
       { x: 14, y: 13, dirX: -1, dirY: 0 },
       { x: 14, y: 1, dirX: -1, dirY: 0 },
-      { x: 1, y: 13, dirX: 1, dirY: 0 }
+      { x: 1, y: 13, dirX: 1, dirY: 0 },
+      { x: 8, y: 7, dirX: 0, dirY: 1 }
     ];
     ghosts = starts.slice(0, levelConfig.ghostCount).map((start) => ({ ...start }));
+  };
+
+  const startRound = (autoDirection = null, preservePellets = false) => {
+    clearTransitionTimer();
+    ended = false;
+    hasStarted = Boolean(autoDirection);
+    pacman = {
+      x: 1,
+      y: 1,
+      dirX: autoDirection ? autoDirection.x : 0,
+      dirY: autoDirection ? autoDirection.y : 0,
+      nextDirX: autoDirection ? autoDirection.x : 0,
+      nextDirY: autoDirection ? autoDirection.y : 0
+    };
+    spawnGhosts();
+    if (!preservePellets) {
+      spawnPellets();
+    }
+    stageMessage = "";
+    messageBox.innerHTML = "";
+    updateScore();
+    mouthPhase = 0;
+    draw();
+    stopLoop();
+    if (autoDirection) {
+      startLoop();
+    }
+  };
+
+  const scheduleTransition = (callback) => {
+    clearTransitionTimer();
+    transitionTimeoutId = window.setTimeout(() => {
+      transitionTimeoutId = null;
+      callback();
+    }, 850);
+  };
+
+  const loseLife = () => {
+    if (lives > 1) {
+      lives -= 1;
+      ended = true;
+      stopLoop();
+      stageMessage = `Une vie perdue. Il reste ${lives} vies.`;
+      messageBox.innerHTML = `<div class="minesweeper-message lose">${stageMessage}</div>`;
+      draw();
+      scheduleTransition(() => {
+        startRound(null, true);
+      });
+      return;
+    }
+
+    ended = true;
+    stopLoop();
+    showResult("lose");
+    draw();
+  };
+
+  const completeRound = () => {
+    const resumeDirection = {
+      x: pacman.dirX || pacman.nextDirX || 1,
+      y: pacman.dirY || pacman.nextDirY || 0
+    };
+
+    if (roundIndex + 1 < levelConfig.rounds) {
+      const nextRound = roundIndex + 1;
+      ended = true;
+      stopLoop();
+      stageMessage = `Niveau ${roundIndex + 1}/${levelConfig.rounds} terminé. Niveau suivant...`;
+      messageBox.innerHTML = `<div class="minesweeper-message win">${stageMessage}</div>`;
+      draw();
+      scheduleTransition(() => {
+        roundIndex = nextRound;
+        startRound(resumeDirection);
+      });
+      return;
+    }
+
+    ended = true;
+    stopLoop();
+    showResult("win");
+    draw();
   };
 
   const draw = () => {
@@ -986,21 +1272,15 @@ function renderPacman(item) {
       pellets.delete(key);
       score += 1;
       updateScore();
-      if (score >= levelConfig.goal) {
-        ended = true;
-        stopLoop();
-        showResult("win");
-        draw();
+      if (pellets.size === 0) {
+        completeRound();
         return;
       }
     }
 
     // Collision immediate si Pac-Man arrive sur la case actuelle d'un fantome.
     if (checkGhostCollision()) {
-      ended = true;
-      stopLoop();
-      showResult("lose");
-      draw();
+      loseLife();
       return;
     }
 
@@ -1008,10 +1288,7 @@ function renderPacman(item) {
 
     // Collision apres deplacement ou croisement de trajectoires dans le meme tick.
     if (checkGhostCollision() || crossedGhost(previousPacman, previousGhosts)) {
-      ended = true;
-      stopLoop();
-      showResult("lose");
-      draw();
+      loseLife();
       return;
     }
 
@@ -1054,17 +1331,12 @@ function renderPacman(item) {
   const startGame = (levelKey) => {
     item.gameLevel = levelKey;
     levelConfig = PACMAN_LEVELS[levelKey] || PACMAN_LEVELS.moyen;
+    roundIndex = 0;
+    lives = levelConfig.lives || 3;
     messageBox.innerHTML = "";
     score = 0;
-    ended = false;
-    hasStarted = false;
-    pacman = { x: 1, y: 1, dirX: 0, dirY: 0, nextDirX: 0, nextDirY: 0 };
-    spawnGhosts();
-    spawnPellets();
-    updateScore();
-    mouthPhase = 0;
-    draw();
-    stopLoop();
+    clearTransitionTimer();
+    startRound();
   };
 
   difficultySelect.addEventListener("change", () => {
@@ -1077,6 +1349,7 @@ function renderPacman(item) {
 
   window.addEventListener("keydown", handleKeyDown);
   activeGameCleanup = () => {
+    clearTransitionTimer();
     stopLoop();
     window.removeEventListener("keydown", handleKeyDown);
   };

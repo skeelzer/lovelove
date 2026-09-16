@@ -30,6 +30,4 @@ On le fera ensemble case par case.
 
 ## Tester en local avant mise en ligne
 
-- Double-cliquer sur preview-local.cmd
-- Si Python est installe: ouverture sur http://localhost:5500 avec serveur local
-- Sinon: ouverture directe de index.html dans le navigateur
+- En PowerShell, lancer: `.preview-all.cmd`
