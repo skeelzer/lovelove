@@ -2037,16 +2037,42 @@ function renderSolitaire(item) {
   let locked = false;
   let matched = 0;
   let cards = [];
+  let timerId = null;
+  let remainingSeconds = 0;
 
   const levelPairs = { facile: 6, moyen: 8, dur: 10 };
+  const levelTimer = { facile: 180, moyen: 120, dur: 90 };
 
   const updateScore = () => {
-    ui.scoreBox.textContent = `Paires trouvées: ${matched} / ${cards.length / 2}`;
+    ui.scoreBox.textContent = `Paires trouvées: ${matched} / ${cards.length / 2} | Temps: ${remainingSeconds}s`;
+  };
+
+  const stopTimer = () => {
+    if (timerId) {
+      window.clearInterval(timerId);
+      timerId = null;
+    }
+  };
+
+  const startTimer = () => {
+    stopTimer();
+    timerId = window.setInterval(() => {
+      remainingSeconds -= 1;
+      updateScore();
+      if (remainingSeconds <= 0) {
+        remainingSeconds = 0;
+        updateScore();
+        stopTimer();
+        locked = true;
+        setGameMessage(ui.messageBox, "lose", "Le temps est écoulé, la partie est perdue.");
+      }
+    }, 1000);
   };
 
   const startGame = (level) => {
     item.gameLevel = level;
     const pairCount = levelPairs[level] || levelPairs.moyen;
+    remainingSeconds = levelTimer[level] || levelTimer.moyen;
     const values = [];
     for (let i = 1; i <= pairCount; i += 1) {
       values.push(i, i);
@@ -2061,6 +2087,7 @@ function renderSolitaire(item) {
     ui.messageBox.innerHTML = "";
     updateScore();
     draw();
+    startTimer();
   };
 
   const draw = () => {
@@ -2099,6 +2126,7 @@ function renderSolitaire(item) {
       matched += 1;
       updateScore();
       if (cards.every((entry) => entry.done)) {
+        stopTimer();
         setGameMessage(ui.messageBox, "win", "Tu as réussi à survivre pour aujourd'hui, à demain");
       }
       return;
@@ -2117,6 +2145,7 @@ function renderSolitaire(item) {
 
   ui.difficultySelect.addEventListener("change", () => startGame(ui.difficultySelect.value));
   ui.resetButton.addEventListener("click", () => startGame(ui.difficultySelect.value));
+  ui.addCleanup(() => stopTimer());
 
   startGame(ui.difficultySelect.value);
   openModal();

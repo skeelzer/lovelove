@@ -112,7 +112,7 @@ h1 {
   display: block;
   font-size: 1.45rem;
   font-weight: 700;
-  color: #ffffff;
+  color: #5d273f;
 }
 
 .case-date {
@@ -128,6 +128,7 @@ h1 {
   padding: 0.18rem 0.55rem;
   border-radius: 999px;
   background: rgba(204, 95, 126, 0.12);
+  color: #6f3550;
 }
 
 .case-status.locked {
@@ -469,11 +470,12 @@ h1 {
 }
 
 .case-card.locked .case-label {
-  color: #ffffff;
+  color: #5d273f;
 }
 
 .case-card.locked .case-status {
   background: rgba(80, 57, 68, 0.12);
+  color: #5d273f;
 }
 
 .modal {
