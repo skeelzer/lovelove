@@ -497,12 +497,16 @@ h1 {
 
 .modal-card {
   width: min(640px, 100%);
+  max-height: calc(100vh - 2rem);
   background: var(--card);
   border-radius: 18px;
   border: 1px solid rgba(200, 100, 132, 0.3);
   box-shadow: 0 20px 45px rgba(55, 24, 36, 0.35);
   padding: 1.2rem 1.2rem 1.4rem;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   animation: pop 220ms ease;
 }
 
@@ -534,6 +538,9 @@ h1 {
   border-radius: 14px;
   padding: 0.95rem;
   min-height: 100px;
+  min-height: 0;
+  flex: 1;
+  overflow: auto;
   border: 1px dashed rgba(169, 69, 105, 0.35);
 }
 
